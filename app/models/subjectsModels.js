@@ -1,4 +1,3 @@
-const mysql = require('mysql2/promise'); // Asegúrate de usar mysql2/promise
 const { dbConnect } = require('../../config/mysql');
 
 const createSubject = async (subjectData) => {

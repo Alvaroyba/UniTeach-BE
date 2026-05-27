@@ -2,7 +2,7 @@ const searchModels = require('../models/searchModels');
 
 const searchMentors = async (req, res) => {
     try {
-        const { University, subjectName = [], Facultad = [] } = req.query;  // Asignación por defecto
+        const { University, subjectName, Facultad } = req.query;
 
         // Validar que 'university' esté presente
         if (!University) {

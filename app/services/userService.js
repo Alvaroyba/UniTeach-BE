@@ -1,4 +1,3 @@
-const mysql = require("mysql2");
 const { dbConnect } = require("../../config/mysql");
 const { google } = require("googleapis");
 const OAuth2 = google.auth.OAuth2;

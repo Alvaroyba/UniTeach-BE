@@ -1,4 +1,3 @@
-const mysql = require("mysql2");
 const { dbConnect } = require("../../config/mysql"); // Asegúrate de tener configurado el archivo de conexión en config/mysql.js
 
 const searchMentors = async (subjectName, Facultad, University) => {
@@ -15,17 +14,17 @@ const searchMentors = async (subjectName, Facultad, University) => {
         s.Id_Facultad AS IdFacultad,
         u.University AS MentorUniversity,
         u.Avatar_URL,
-        GROUP_CONCAT(CONCAT(c.hour, ', ', DATE_FORMAT(c.date, '%d-%m-%Y')) SEPARATOR '; ') AS ClassDetails
+        STRING_AGG(CASE WHEN c.hour IS NOT NULL THEN CONCAT(c.hour, ', ', TO_CHAR(c.date, 'YYYY-MM-DD')) ELSE NULL END, '; ') AS ClassDetails
     FROM 
         users u
     JOIN 
         userssubjects us ON u.idUser = us.Users_idUser
     JOIN 
         subjects s ON us.Subjects_idSubjects = s.idSubjects
-    JOIN 
+    LEFT JOIN 
         classes c ON c.Subjects_idSubjects = s.idSubjects 
                  AND c.Users_idCreator = u.idUser
-                 AND c.expired = FALSE
+                 AND c.expired = 0
     WHERE 
         u.TypeOfUser IN ('MENTOR', 'AMBOS')
         AND u.University = ?
@@ -35,7 +34,7 @@ const searchMentors = async (subjectName, Facultad, University) => {
 
   // Filtro por materia (opcional)
   if (subjectName) {
-    query += " AND s.Name LIKE ?";
+    query += " AND unaccent(s.Name) ILIKE unaccent(?)";
     values.push(`%${subjectName}%`);
   }
 
@@ -46,7 +45,7 @@ const searchMentors = async (subjectName, Facultad, University) => {
   } else if (subjectName) {
     // Obtener facultad de la materia si no se proporcionó
     const [facultadResult] = await connection.query(
-      "SELECT Facultad FROM subjects WHERE Name LIKE ? LIMIT 1",
+      "SELECT Facultad FROM subjects WHERE unaccent(Name) ILIKE unaccent(?) LIMIT 1",
       [`%${subjectName}%`]
     );
     if (facultadResult.length > 0) {

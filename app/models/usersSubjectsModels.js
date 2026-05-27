@@ -1,4 +1,3 @@
-const mysql = require("mysql2/promise");
 const { dbConnect } = require("../../config/mysql");
 
 // Crear una relación usuario-materia
